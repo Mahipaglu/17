@@ -605,6 +605,8 @@
                 ← Back
             </button>
         </div>
+
+        <!-- Replaced the static "coming soon" block with a gallery area -->
         <div class="bg-pink-100 rounded-3xl p-8 min-h-80 relative">
             <svg class="absolute top-4 left-4 w-20 h-20" viewBox="0 0 100 100">
                 <path d="M 10 50 Q 10 10 50 10 Q 90 10 90 50 Q 90 90 50 90 Q 10 90 10 50" stroke="#ff69b4" stroke-width="2" fill="none"/>
@@ -612,8 +614,15 @@
             <svg class="absolute bottom-4 right-4 w-24 h-24" viewBox="0 0 100 100">
                 <path d="M 20 40 L 50 20 L 80 40 L 50 80 Z" stroke="#ff69b4" stroke-width="2" fill="none"/>
             </svg>
-            <div class="text-center py-20">
+
+            <!-- Empty gallery message (shown only when there are no photos) -->
+            <div id="emptyGallery" class="text-center py-20">
                 <p class="text-2xl text-gray-500">Gallery coming soon... 💕</p>
+            </div>
+
+            <!-- Actual gallery grid - populated by JS -->
+            <div id="galleryGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6" style="display: none;">
+                <!-- JS will append .polaroid items here -->
             </div>
         </div>
     </div>
@@ -629,7 +638,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div class="bg-orange-200 rounded-3xl p-6 border-4 border-orange-300">
                 <h3 class="text-3xl font-bold mb-4">Note</h3>
-                <textarea id="noteEditor" class="w-full h-32 p-4 rounded-2xl bg-yellow-50 border-2 border-orange-300 focus:outline-none focus:border-orange-400 resize-none" placeholder="Write your special message here..."></textarea>
+                <textarea id="noteEditor" class="w-full h-32 p-4 rounded-2xl bg-yellow-50 border-2 border-orange-300 focus:outline-none focus:border-orange-400 resize-none" placeholder="Write your spe[...]
                 <button onclick="saveNote()" class="mt-4 bg-orange-400 hover:bg-orange-500 px-6 py-2 rounded-full text-white font-bold">
                     Save Note
                 </button>
@@ -742,6 +751,7 @@
                 // Use placeholder
                 galleryImages = ['https://via.placeholder.com/400x400/ffb3d9/ffffff?text=Add+Photos'];
                 validGalleryImages = galleryImages;
+                photosLoaded = true; // set true so gallery won't keep waiting
             }
         }
         
@@ -801,22 +811,35 @@
             }
             
             if (screenId === 'GALLERY') {
+                // call async loader - no need to await here
                 loadGallery();
             }
         }
         
         // Load gallery with photos
-        function loadGallery() {
+        async function loadGallery() {
+            // Wait for photos to be loaded (in case user opens gallery before initial load completes)
+            if (!photosLoaded) {
+                await loadPhotosFromFiles();
+            }
+            
             const galleryGrid = document.getElementById('galleryGrid');
             const emptyGallery = document.getElementById('emptyGallery');
             
-            if (validGalleryImages.length === 0) {
+            if (!galleryGrid || !emptyGallery) {
+                console.warn('Gallery DOM elements missing (galleryGrid or emptyGallery).');
+                return;
+            }
+            
+            if (!validGalleryImages || validGalleryImages.length === 0) {
                 galleryGrid.innerHTML = '';
+                galleryGrid.style.display = 'none';
                 emptyGallery.style.display = 'block';
                 return;
             }
             
             emptyGallery.style.display = 'none';
+            galleryGrid.style.display = 'grid';
             galleryGrid.innerHTML = '';
             
             validGalleryImages.forEach((imageUrl, index) => {
@@ -880,7 +903,7 @@
             } else if (!strangerEnabled) {
                 showErrorMessage('Aww! Stranger login is disabled right now 🙈');
             } else {
-                showErrorMessage('Hmm... that code doesn\'t look right! Try again! 🤔💫');
+                showErrorMessage('Hmm... that code doesn\\'t look right! Try again! 🤔💫');
             }
         }
         
