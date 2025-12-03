@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maahipaglu's cutu cloud</title>
+    <title>Mahipaglu's cutu cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&family=Patrick+Hand&display=swap');
@@ -134,7 +134,7 @@
                 <div style="background: linear-gradient(135deg, #ffb3d9 0%, #ffc9e3 100%); border-radius: 2rem; padding: 24px 28px; box-shadow: 0 6px 12px rgba(255, 182, 193, 0.4);">
                     <div class="flex items-center gap-4" style="flex-wrap: wrap;">
                         <label style="font-size: 1.4rem; font-weight: bold; white-space: nowrap; color: #2d2d2d;">Sarvesh likes?</label>
-                        <input type="text" id="ownerPassword" style="flex: 1; min-width: 150px; padding: 14px 20px; border-radius: 1.5rem; background: #fffacd; border: none; font-size: 1.1rem; outline: none; color: #2d2d2d;" placeholder="ofc you...">
+                        <input type="text" id="ownerPassword" style="flex: 1; min-width: 150px; padding: 14px 20px; border-radius: 1.5rem; background: #fffacd; border: none; font-size: 1.1rem; outline: none; color: #2d2d2d;" placeholder="type 'mahi' here...">
                     </div>
                 </div>
             </div>
@@ -236,9 +236,9 @@
 
     <script>
         const CONFIG = {
-            ownerPassword: "kuchupuchu",
+            ownerPassword: "mahi",
             strangerCode: "6000302",
-            users: { owner: "kuchupuchu", stranger: "Stranger" }
+            users: { owner: "Mahi", stranger: "Stranger" }
         };
 
         // --- NAVIGATION & INIT ---
@@ -267,11 +267,10 @@
         }
 
         // --- IMAGE FETCHING LOGIC ---
-        // This function attempts to load 1.txt, 2.txt etc until it 404s
         let galleryLoaded = false;
 
         async function loadGalleryImages() {
-            if (galleryLoaded) return; // Don't reload if already done
+            if (galleryLoaded) return;
 
             const galleryGrid = document.getElementById('gallery-grid');
             const loader = document.getElementById('gallery-loading');
@@ -285,11 +284,9 @@
             // Maximum safety limit of 50 photos to prevent infinite loops
             while (keepFetching && index < 50) {
                 try {
-                    // Try to fetch the text file from photos folder
                     const response = await fetch(`photos/${index}.txt`);
                     
                     if (!response.ok) {
-                        // If file not found (404), we assume we reached the end
                         keepFetching = false;
                         break;
                     }
@@ -297,7 +294,7 @@
                     const base64Data = await response.text();
                     createGalleryItem(base64Data, index);
                     
-                    // Also update the dashboard/login previews with the first image found
+                    // Update the dashboard/login previews with the first image found
                     if (index === 1) {
                         updatePreviewImages(base64Data);
                     }
@@ -315,10 +312,12 @@
         }
 
         function createGalleryItem(base64String, index) {
-            // Clean string just in case
-            let cleanStr = base64String.trim();
-            // Add header if missing
+            // FIX: Remove all line breaks/enters from the text file and trim whitespace
+            let cleanStr = base64String.replace(/(\r\n|\n|\r)/gm, "").trim();
+
+            // FIX: Check if the user pasted the header or just the raw code
             if (!cleanStr.startsWith('data:image')) {
+                // Default to jpeg if raw string, but users should ensure this matches their image type
                 cleanStr = `data:image/jpeg;base64,${cleanStr}`;
             }
 
@@ -332,13 +331,21 @@
             img.src = cleanStr;
             img.className = "w-full h-full object-cover";
             img.alt = `Memory ${index}`;
+            
+            // Add a visual error handler for debugging
+            img.onerror = function() {
+                console.error(`Image ${index} failed to load. Check Base64 string in photos/${index}.txt`);
+                wrapper.classList.remove('bg-white');
+                wrapper.classList.add('bg-red-200');
+                wrapper.innerHTML = '<div class="flex items-center justify-center w-full h-full text-sm text-red-700 text-center p-2">Error: Bad data in file '+index+'.txt</div>';
+            };
 
             wrapper.appendChild(img);
             document.getElementById('gallery-grid').appendChild(wrapper);
         }
 
         function updatePreviewImages(base64String) {
-            let cleanStr = base64String.trim();
+            let cleanStr = base64String.replace(/(\r\n|\n|\r)/gm, "").trim();
             if (!cleanStr.startsWith('data:image')) {
                 cleanStr = `data:image/jpeg;base64,${cleanStr}`;
             }
@@ -357,10 +364,9 @@
             if (input === CONFIG.ownerPassword) {
                 document.getElementById('username').innerText = CONFIG.users.owner;
                 showScreen('DASHBOARD');
-                // Pre-fetch images in background
                 loadGalleryImages(); 
             } else {
-                showError("Galat jawab! 🙈 ");
+                showError("Galat jawab! 🙈 Try 'mahi'");
             }
         }
 
@@ -394,9 +400,8 @@
                     throw new Error('No image');
                 })
                 .then(data => updatePreviewImages(data))
-                .catch(e => console.log("No initial image found"));
+                .catch(e => console.log("No initial image found (photos/1.txt missing or corrupt)"));
         });
     </script>
 </body>
 </html>
-
