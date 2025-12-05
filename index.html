@@ -88,6 +88,47 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #8b6f47;
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
         @media (max-width: 768px) {
             .login-main-container { flex-direction: column !important; padding: 20px !important; }
             .welcome-box { position: static !important; transform: none !important; margin: 20px auto !important; max-width: 90% !important; }
@@ -134,7 +175,7 @@
                 <div style="background: linear-gradient(135deg, #ffb3d9 0%, #ffc9e3 100%); border-radius: 2rem; padding: 24px 28px; box-shadow: 0 6px 12px rgba(255, 182, 193, 0.4);">
                     <div class="flex items-center gap-4" style="flex-wrap: wrap;">
                         <label style="font-size: 1.4rem; font-weight: bold; white-space: nowrap; color: #2d2d2d;">Sarvesh likes?</label>
-                        <input type="text" id="ownerPassword" style="flex: 1; min-width: 150px; padding: 14px 20px; border-radius: 1.5rem; background: #fffacd; border: none; font-size: 1.1rem; outline: none; color: #2d2d2d;" placeholder="type the corre here...">
+                        <input type="text" id="ownerPassword" style="flex: 1; min-width: 150px; padding: 14px 20px; border-radius: 1.5rem; background: #fffacd; border: none; font-size: 1.1rem; outline: none; color: #2d2d2d;" placeholder="type the correct word here...">
                     </div>
                 </div>
             </div>
@@ -177,7 +218,8 @@
 
     <div id="DASHBOARD" class="screen hidden w-full h-screen p-0 m-0" style="background-color: #f5e6d3; overflow-y: auto;">
         <div class="relative w-full min-h-screen p-8">
-            <button onclick="showScreen('LOGIN_MAIN')" style="position: absolute; top: 20px; left: 20px; z-index: 50; padding: 8px 16px; background: #8b6f47; color: white; border-radius: 20px;">Logout</button>
+            <button onclick="showScreen('LOGIN_MAIN')" style="position: absolute; top: 20px; left: 20px; z-index: 50; padding: 8px 16px; background: #8b6f47; color: white; border-radius: 20px; cursor: pointer;">Logout</button>
+            <button id="settingsButton" onclick="showScreen('SETTINGS')" style="position: absolute; top: 20px; right: 20px; z-index: 50; padding: 8px 16px; background: #8b6f47; color: white; border-radius: 20px; cursor: pointer; display: none;">⚙️ Settings</button>
             
             <div class="flex flex-wrap items-start gap-8 pt-8 px-8 justify-center" style="max-width: 1200px; margin: 0 auto;">
                 
@@ -218,10 +260,66 @@
         </div>
     </div>
 
+    <div id="SETTINGS" class="screen hidden w-full h-screen p-8" style="background-color: #f5e6d3; overflow-y: auto;">
+        <div class="max-w-2xl mx-auto">
+            <div class="mb-6">
+                <button onclick="showScreen('DASHBOARD')" class="bg-[#8b6f47] px-6 py-2 rounded-full text-white hover:bg-[#6b5435] transition cursor-pointer">← Back</button>
+            </div>
+            
+            <div class="bg-white rounded-3xl p-8 shadow-lg border border-stone-300">
+                <h2 class="text-3xl font-bold mb-6 text-center" style="color: #2d2d2d;">Settings ⚙️</h2>
+                
+                <div class="space-y-6">
+                    <!-- Stranger Login Toggle -->
+                    <div class="bg-purple-50 rounded-2xl p-6 border-2 border-purple-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold" style="color: #2d2d2d;">Stranger Login</h3>
+                                <p class="text-sm text-gray-600 mt-1">Enable or disable stranger login access</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="strangerLoginToggle" onchange="toggleStrangerLogin()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Stranger Password -->
+                    <div class="bg-blue-50 rounded-2xl p-6 border-2 border-blue-200">
+                        <h3 class="text-xl font-bold mb-4" style="color: #2d2d2d;">Stranger Password</h3>
+                        <p class="text-sm text-gray-600 mb-3">Change the code required for stranger login</p>
+                        <div class="flex gap-3">
+                            <input type="text" id="strangerPasswordInput" placeholder="Enter new code" 
+                                class="flex-1 px-4 py-2 rounded-lg border-2 border-blue-300 focus:outline-none focus:border-blue-500" 
+                                style="background: white; color: #2d2d2d;">
+                            <button onclick="saveStrangerPassword()" 
+                                class="bg-blue-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-600 transition cursor-pointer">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Note -->
+                    <div class="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+                        <h3 class="text-xl font-bold mb-4" style="color: #2d2d2d;">Dashboard Note</h3>
+                        <p class="text-sm text-gray-600 mb-3">Edit the message shown on the dashboard</p>
+                        <textarea id="dashboardNoteInput" rows="3" placeholder="Enter your note..." 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-green-300 focus:outline-none focus:border-green-500 resize-none" 
+                            style="background: white; color: #2d2d2d;"></textarea>
+                        <button onclick="saveDashboardNote()" 
+                            class="mt-3 bg-green-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-600 transition cursor-pointer">
+                            Save Note
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="GALLERY" class="screen hidden w-full h-screen p-8" style="background-color: #f5e6d3; overflow-y: auto;">
         <div class="max-w-4xl mx-auto">
             <div class="mb-6">
-                <button onclick="showScreen('DASHBOARD')" class="bg-[#8b6f47] px-6 py-2 rounded-full text-white hover:bg-[#6b5435] transition">← Back</button>
+                <button onclick="showScreen('DASHBOARD')" class="bg-[#8b6f47] px-6 py-2 rounded-full text-white hover:bg-[#6b5435] transition cursor-pointer">← Back</button>
             </div>
             
             <div id="gallery-loading" class="text-center py-10">
@@ -238,8 +336,12 @@
         const CONFIG = {
             ownerPassword: "kuchupuchu",
             strangerCode: "6000302",
-            users: { owner: "Maahi", stranger: "Stranger" }
+            users: { owner: "Maahi", stranger: "Stranger" },
+            flowerImage: "pics/flower.jpg" // Path to flower image in pics folder
         };
+
+        // Track current user type
+        let currentUserType = null; // 'owner' or 'stranger'
 
         // --- NAVIGATION & INIT ---
         function showScreen(screenId) {
@@ -254,10 +356,32 @@
                 if (screenId.includes('LOGIN')) target.classList.add('flex');
             }
             
+            // Show/hide settings button based on user type
+            const settingsButton = document.getElementById('settingsButton');
+            if (settingsButton) {
+                if (screenId === 'DASHBOARD' && currentUserType === 'owner') {
+                    settingsButton.style.display = 'block';
+                } else {
+                    settingsButton.style.display = 'none';
+                }
+            }
+
+            // Load settings when opening settings screen
+            if (screenId === 'SETTINGS') {
+                loadSettings();
+            }
+            
+            // Update stranger login visibility when showing login screen
+            if (screenId === 'LOGIN_MAIN') {
+                const strangerLoginEnabled = localStorage.getItem('strangerLoginEnabled') !== 'false';
+                updateStrangerLoginVisibility(strangerLoginEnabled);
+            }
+            
             // Clear inputs
             if(screenId === 'LOGIN_MAIN') {
                 document.getElementById('ownerPassword').value = '';
                 document.getElementById('strangerCode').value = '';
+                currentUserType = null; // Reset on logout
             }
 
             // Trigger Gallery Load only when opening Gallery
@@ -449,17 +573,9 @@
 
             cleanStr = `data:image/${imageType};base64,${base64Data}`;
             
-            // Update login screen flower
-            const loginImg = document.getElementById('login-preview-img');
-            if(loginImg) {
-                loginImg.onerror = function() {
-                    console.warn("Login preview image failed to load");
-                    loginImg.style.display = 'none';
-                };
-                loginImg.src = cleanStr;
-            }
+            // Note: Login flower is loaded separately from pics folder, don't override it
             
-            // Update dashboard polaroid
+            // Update dashboard polaroid only
             const dashImg = document.getElementById('dashboardPhoto');
             if(dashImg) {
                 dashImg.onerror = function() {
@@ -474,6 +590,7 @@
         function submitOwnerLogin() {
             const input = document.getElementById('ownerPassword').value.trim().toLowerCase();
             if (input === CONFIG.ownerPassword) {
+                currentUserType = 'owner';
                 document.getElementById('username').innerText = CONFIG.users.owner;
                 showScreen('DASHBOARD');
                 loadGalleryImages(); 
@@ -485,6 +602,7 @@
         function submitStrangerLogin() {
             const input = document.getElementById('strangerCode').value.trim();
             if (input === CONFIG.strangerCode) {
+                currentUserType = 'stranger';
                 document.getElementById('username').innerText = CONFIG.users.stranger;
                 showScreen('DASHBOARD');
                 loadGalleryImages();
@@ -503,15 +621,137 @@
             setTimeout(() => { if (msgDiv) msgDiv.remove(); }, 2000);
         }
 
+        // --- SETTINGS MANAGEMENT ---
+        function loadSettings() {
+            // Load stranger login enabled state
+            const strangerLoginEnabled = localStorage.getItem('strangerLoginEnabled') !== 'false'; // Default to true
+            const toggle = document.getElementById('strangerLoginToggle');
+            if (toggle) {
+                toggle.checked = strangerLoginEnabled;
+            }
+            updateStrangerLoginVisibility(strangerLoginEnabled);
+
+            // Load stranger password
+            const savedStrangerCode = localStorage.getItem('strangerCode');
+            if (savedStrangerCode) {
+                CONFIG.strangerCode = savedStrangerCode;
+            }
+            const passwordInput = document.getElementById('strangerPasswordInput');
+            if (passwordInput) {
+                passwordInput.value = CONFIG.strangerCode;
+            }
+
+            // Load dashboard note
+            const savedNote = localStorage.getItem('dashboardNote');
+            if (savedNote) {
+                const noteDisplay = document.getElementById('noteDisplay');
+                if (noteDisplay) {
+                    noteDisplay.innerText = savedNote;
+                }
+            }
+            const noteInput = document.getElementById('dashboardNoteInput');
+            if (noteInput) {
+                noteInput.value = savedNote || 'Your special memories live here... ✨';
+            }
+        }
+
+        function toggleStrangerLogin() {
+            const toggle = document.getElementById('strangerLoginToggle');
+            const isEnabled = toggle.checked;
+            localStorage.setItem('strangerLoginEnabled', isEnabled);
+            updateStrangerLoginVisibility(isEnabled);
+            showError(isEnabled ? "Stranger login enabled ✅" : "Stranger login disabled 🔒");
+        }
+
+        function updateStrangerLoginVisibility(isEnabled) {
+            const ghostMascot = document.querySelector('.ghost-mascot');
+            if (ghostMascot) {
+                ghostMascot.style.display = isEnabled ? 'block' : 'none';
+            }
+        }
+
+        function saveStrangerPassword() {
+            const input = document.getElementById('strangerPasswordInput');
+            const newCode = input.value.trim();
+            if (!newCode) {
+                showError("Please enter a code!");
+                return;
+            }
+            CONFIG.strangerCode = newCode;
+            localStorage.setItem('strangerCode', newCode);
+            showError("Stranger password saved! ✅");
+        }
+
+        function saveDashboardNote() {
+            const input = document.getElementById('dashboardNoteInput');
+            const newNote = input.value.trim();
+            if (!newNote) {
+                showError("Please enter a note!");
+                return;
+            }
+            localStorage.setItem('dashboardNote', newNote);
+            const noteDisplay = document.getElementById('noteDisplay');
+            if (noteDisplay) {
+                noteDisplay.innerText = newNote;
+            }
+            showError("Dashboard note saved! ✅");
+        }
+
+        function loadFlowerPhoto() {
+            // Load flower photo from pics folder
+            const flowerImg = document.getElementById('login-preview-img');
+            if (!flowerImg) return;
+            
+            flowerImg.onerror = function() {
+                console.log(`Flower image not found at ${CONFIG.flowerImage}`);
+                flowerImg.style.display = 'none';
+            };
+            
+            flowerImg.src = CONFIG.flowerImage;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             showScreen('LOGIN_MAIN');
-            // Try to load just the first image immediately for the dashboard/login preview
+            // Load settings on page load
+            loadSettings();
+            // Load flower photo from pics folder
+            loadFlowerPhoto();
+            // Try to load first image from photos for dashboard preview
             fetch('photos/1.txt')
                 .then(res => {
                     if(res.ok) return res.text();
                     throw new Error('No image');
                 })
-                .then(data => updatePreviewImages(data))
+                .then(data => {
+                    // Only update dashboard photo, not login flower
+                    const dashImg = document.getElementById('dashboardPhoto');
+                    if(dashImg && data) {
+                        let cleanStr = data.replace(/(\r\n|\n|\r)/gm, "").trim();
+                        if (cleanStr && cleanStr.length >= 50) {
+                            let base64Data = cleanStr;
+                            let imageType = 'jpeg';
+                            
+                            if (cleanStr.startsWith('data:image')) {
+                                const match = cleanStr.match(/data:image\/(\w+);base64,(.+)/);
+                                if (match) {
+                                    imageType = match[1];
+                                    base64Data = match[2];
+                                } else {
+                                    const parts = cleanStr.split(',');
+                                    if (parts.length > 1) {
+                                        base64Data = parts[parts.length - 1];
+                                    }
+                                }
+                            } else {
+                                imageType = detectImageType(base64Data);
+                            }
+                            
+                            if (isValidBase64(base64Data)) {
+                                dashImg.src = `data:image/${imageType};base64,${base64Data}`;
+                            }
+                        }
+                    }
+                })
                 .catch(e => console.log("No initial image found (photos/1.txt missing or corrupt)"));
         });
     </script>
